@@ -2,7 +2,10 @@ package com.chatbot.demo.controller;
 
 import com.chatbot.demo.dto.ChatRequest;
 import com.chatbot.demo.dto.ChatResponse;
+import com.chatbot.demo.entity.ChatMessage;
+import com.chatbot.demo.repository.ChatRepository;
 import com.chatbot.demo.service.AIService;
+import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -11,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class ChatController {
 
     private final AIService aiService;
+    private final ChatRepository chatRepository;
 
-    public ChatController(AIService aiService) {
+    public ChatController(AIService aiService, ChatRepository chatRepository) {
         this.aiService = aiService;
+        this.chatRepository = chatRepository;
     }
 
     @PostMapping
@@ -24,4 +29,15 @@ public class ChatController {
         );
         return new ChatResponse(reply);
     }
+
+    @GetMapping("/sessions")
+    public List<String> getSessions() {
+        return chatRepository.findAllSessionIds();
+    }
+
+    @GetMapping("/sessions/{sessionId}")
+    public List<ChatMessage> getChat(@PathVariable String sessionId) {
+        return chatRepository.findBySessionIdOrderByTimestampAsc(sessionId);
+    }
+
 }
